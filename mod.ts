@@ -3,7 +3,7 @@ const escapeDefault: (str: string) => string = (str) => {
         .replaceAll("&", "&amp;")
         .replaceAll("<", "&lt;")
         .replaceAll(">", "&gt;")
-        .replaceAll("'", "&apos;")
+        .replaceAll("'", "&apos;") // Note: technically not valid in HTML4
         .replaceAll("\"", "&quot;")
     ;
 };
