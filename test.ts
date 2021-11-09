@@ -1,16 +1,25 @@
 import { assertEquals, assertThrows } from "https://deno.land/std@0.113.0/testing/asserts.ts";
-import { html } from "./mod.ts";
+import { html, xml } from "./mod.ts";
 
 Deno.test({
-    name: "Escape default",
+    name: "Escape default (HTML)",
     fn: () => {
         assertEquals(
             html`<html><body><p>${"what's <this> do? this & \"that\"!"}</p></body></html>`,
-            "<html><body><p>what&apos;s &lt;this&gt; do? this &amp; &quot;that&quot;!</p></body></html>"
+            "<html><body><p>what&#39;s &lt;this&gt; do? this &amp; &quot;that&quot;!</p></body></html>"
         );
     },
 });
 
+Deno.test({
+    name: "Escape default (XML)",
+    fn: () => {
+        assertEquals(
+            xml`<html><body><p>${"what's <this> do? this & \"that\"!"}</p></body></html>`,
+            "<html><body><p>what&apos;s &lt;this&gt; do? this &amp; &quot;that&quot;!</p></body></html>"
+        );
+    },
+});
 
 Deno.test({
     name: "Escape content",
