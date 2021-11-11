@@ -15,8 +15,8 @@ Deno.test({
     name: "Escape default (XML)",
     fn: () => {
         assertEquals(
-            xml`<html><body><p>${"what's <this> do? this & \"that\"!"}</p></body></html>`,
-            "<html><body><p>what&apos;s &lt;this&gt; do? this &amp; &quot;that&quot;!</p></body></html>"
+            xml`<demo>${"what's <this> do? this & \"that\"!"}</demo>`,
+            "<demo>what&apos;s &lt;this&gt; do? this &amp; &quot;that&quot;!</demo>"
         );
     },
 });
