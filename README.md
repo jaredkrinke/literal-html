@@ -23,7 +23,7 @@ Supported types and keys:
 ## Examples
 ### General usage
 ```javascript
-import { html, xml } from "https://deno.land/x/literal_html@1.0.0/mod.ts";
+import { html, xml } from "https://deno.land/x/literal_html/mod.ts";
 
 const value = ...; // Some string to be inserted
 
