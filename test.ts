@@ -1,53 +1,98 @@
 import { assertEquals } from "https://deno.land/std@0.113.0/testing/asserts.ts";
 import { html, xml } from "./mod.ts";
 
+// From the documentation
+Deno.test({
+    name: "Content example",
+    fn: () => {
+        assertEquals(html`<p>${{content: "This will be <escaped>"}}</p>`, "<p>This will be &lt;escaped></p>");
+    },
+});
+
+Deno.test({
+    name: "Attribute examples",
+    fn: () => {
+        assertEquals(html`<img alt="${{attr: 'This will be "escaped"'}}" />`, '<img alt="This will be &quot;escaped&quot;" />');
+        assertEquals(html`<img alt="${{attr: "&"}}" />`, `<img alt="&amp;" />`);
+    },
+});
+
+Deno.test({
+    name: "Verbatim example",
+    fn: () => {
+        assertEquals(html`<p>${{verbatim: "Line 1<br/>Line 2<br/>"}}</p>`, "<p>Line 1<br/>Line 2<br/></p>");
+    },
+});
+
+Deno.test({
+    name: "Verbatim example using a condition",
+    fn: () => {
+        {
+            const alt = "An image";
+            assertEquals(html`<img ${{verbatim: alt ? html`alt="${alt}"` : ""}}/>`, '<img alt="An image"/>');
+        }
+        {
+            const alt = "";
+            assertEquals(html`<img ${{verbatim: alt ? html`alt="${alt}"` : ""}}/>`, "<img />");
+        }
+    },
+});
+
+Deno.test({
+    name: "Verbatim example using a list",
+    fn: () => {
+        const listItems = ["<", ">", "&"];
+        assertEquals(html`<ul>${{
+            verbatim: listItems
+                .map(x => html`<li>${x}</li>`)
+                .join("")
+        }}</ul>`, "<ul><li>&lt;</li><li>&gt;</li><li>&amp;</li></ul>");
+    },
+});
+
+// Functional tests
 Deno.test({
     name: "Escape default (HTML)",
     fn: () => {
-        assertEquals(
-            html`<html><body><p>${"what's <this> do? this & \"that\"!"}</p></body></html>`,
-            "<html><body><p>what&#39;s &lt;this&gt; do? this &amp; &quot;that&quot;!</p></body></html>"
-        );
+        const value = "what's <this> do? this & \"that\"!";
+        const result = html`<html><body><p>${value}</p></body></html>`;
+        assertEquals(result, "<html><body><p>what&#39;s &lt;this&gt; do? this &amp; &quot;that&quot;!</p></body></html>");
     },
 });
 
 Deno.test({
     name: "Escape default (XML)",
     fn: () => {
-        assertEquals(
-            xml`<demo>${"what's <this> do? this & \"that\"!"}</demo>`,
-            "<demo>what&apos;s &lt;this&gt; do? this &amp; &quot;that&quot;!</demo>"
-        );
+        const value = "what's <this> do? this & \"that\"!";
+        const result = xml`<demo>${value}</demo>`;
+        assertEquals(result, "<demo>what&apos;s &lt;this&gt; do? this &amp; &quot;that&quot;!</demo>");
     },
 });
 
 Deno.test({
     name: "Escape content",
     fn: () => {
-        assertEquals(
-            html`<html><body><p>${{content: "what's <this> do? this & \"that\"!"}}</p></body></html>`,
-            "<html><body><p>what's &lt;this> do? this &amp; \"that\"!</p></body></html>"
-        );
+        const value = "what's <this> do? this & \"that\"!";
+        const result = html`<html><body><p>${{content: value}}</p></body></html>`;
+        assertEquals(result, `<html><body><p>what's &lt;this> do? this &amp; "that"!</p></body></html>`);
     },
 });
 
 Deno.test({
     name: "Escape attributes",
     fn: () => {
-        assertEquals(
-            html`<html><body><img alt=\"${{attr: "what's <this> do? this & \"that\"!"}}\" /></body></html>`,
-            "<html><body><img alt=\"what's &lt;this> do? this &amp; &quot;that&quot;!\" /></body></html>"
-        );
+        const value = "what's <this> do? this & \"that\"!";
+        const result = html`<html><body><img alt="${{attr: value}}" /></body></html>`;
+        assertEquals(result, `<html><body><img alt="what's &lt;this> do? this &amp; &quot;that&quot;!" /></body></html>`);
     },
 });
 
 Deno.test({
     name: "Escape URI components",
     fn: () => {
-        assertEquals(
-            html`<html><body><p><a href="https://www.bing.com/search?q=${{param: "what's <this> do? 'this' & \"that\"!"}}">Link</a></p></body></html>`,
-            "<html><body><p><a href=\"https://www.bing.com/search?q=what's%20%3Cthis%3E%20do%3F%20'this'%20%26%20%22that%22!\">Link</a></p></body></html>"
-        );
+        const value = "what's <this> do? 'this' & \"that\"!";
+        const result = html`<html><body><p><a href="https://www.bing.com/search?q=${{param: value}}">Link</a></p></body></html>`;
+        assertEquals(result, `<html><body><p><a href="https://www.bing.com/search?q=what's%20%3Cthis%3E%20do%3F%20'this'%20%26%20%22that%22!">Link</a></p></body></html>`);
     },
 });
 

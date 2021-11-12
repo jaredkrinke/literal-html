@@ -4,7 +4,7 @@ type LiteralHTMLContentValue = {
 };
 
 type LiteralHTMLAttributeValue = {
-    /** Value for an HTML/XML attribute enclosed in quotation marks that should have &, <, and " escaped (e.g. html`<button value="${{attr: 'This will be "escaped"'}}"></button>`) */
+    /** Value for an HTML/XML attribute enclosed in quotation marks that should have &, <, and " escaped (e.g. html`<img alt="${{attr: 'This will be "escaped"'}}" />`) */
     attr: string
 };
 
@@ -14,7 +14,7 @@ type LiteralHTMLQueryParameterValue = {
 };
 
 type LiteralHTMLVerbatimValue = {
-    /** Verbatim HTML/XML content that should be copied verbatim; only use with strings that have already been properly escaped (e.g. html`<ul>${{verbatim: ["<", ">"].map(x => html`<li>${x}</li>`).join("")}}</ul>`)  */
+    /** Verbatim HTML/XML content that should be copied verbatim; only use with valid HTML/XML strings (e.g. html`<p>${{verbatim: "Line 1<br/>Line 2<br/>"}}</p>`)  */
     verbatim: string
 };
 
