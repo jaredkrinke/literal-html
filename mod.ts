@@ -1,85 +1,76 @@
-const escapeDefault: (aposEntity: string, str: string) => string = (aposEntity, str) => {
-    return str
-        .replaceAll("&", "&amp;")
-        .replaceAll("<", "&lt;")
-        .replaceAll(">", "&gt;")
-        .replaceAll("'", aposEntity)
-        .replaceAll("\"", "&quot;")
-    ;
-};
+type LiteralHtmlContentValue = { content: string };
+type LiteralHtmlAttributeValue = { attr: string };
+type LiteralHtmlQueryParameterValue = { param: string };
+type LiteralHtmlVerbatimValue = { verbatim: string };
 
-const escapeContent: (str: string) => string = (str) => {
-    return str
-        .replaceAll("&", "&amp;")
-        .replaceAll("<", "&lt;")
-    ;
-};
-
-const escapeAttribute: (str: string) => string = (str) => {
-    return str
-        .replaceAll("&", "&amp;")
-        .replaceAll("<", "&lt;")
-        .replaceAll("\"", "&quot;")
-    ;
-};
-
-type LitesTemplarContentValue = { content: string };
-type LitesTemplarAttributeValue = { attr: string };
-type LitesTemplarQueryParameterValue = { param: string };
-type LitesTemplarVerbatimValue = { verbatim: string };
-
-type LitesTemplarValue =
+type LiteralHtmlValue =
     | string
     | number
-    | LitesTemplarContentValue
-    | LitesTemplarAttributeValue
-    | LitesTemplarQueryParameterValue
-    | LitesTemplarVerbatimValue
+    | LiteralHtmlContentValue
+    | LiteralHtmlAttributeValue
+    | LiteralHtmlQueryParameterValue
+    | LiteralHtmlVerbatimValue
 ;
 
-type taggedTemplateLiteralHandler = (strings: TemplateStringsArray, ...values: LitesTemplarValue[]) => string;
+type taggedTemplateLiteralHandler = (strings: TemplateStringsArray, ...values: LiteralHtmlValue[]) => string;
 
 function createEscaper(aposEntity: string): taggedTemplateLiteralHandler {
     return (strings, ...values): string => {
-        let result = "";
-        let i = 0;
-        for (const str of strings) {
-            result += str;
-            if (i < values.length) {
-                const value = values[i++];
-                switch (typeof(value)) {
-                    case "string":
-                        result += escapeDefault(aposEntity, value);
-                        break;
+        let result = strings[0];
+        let i = 1;
+        for (const value of values) {
+            switch (typeof(value)) {
+                case "string":
+                    // Default escaping: &<>'"
+                    result += value
+                        .replaceAll("&", "&amp;")
+                        .replaceAll("<", "&lt;")
+                        .replaceAll(">", "&gt;")
+                        .replaceAll("'", aposEntity)
+                        .replaceAll("\"", "&quot;")
+                    ;
+                    break;
 
-                    case "number":
-                        result += value.toString();
-                        break;
+                case "number":
+                    // No escaping for numbers
+                    result += value.toString();
+                    break;
 
-                    case "object":
-                        {
-                            const key = Object.keys(value)[0];
-                            switch (key) {
-                                case "content":
-                                    result += escapeContent((value as LitesTemplarContentValue).content);
-                                    break;
-                                
-                                case "attr":
-                                    result += escapeAttribute((value as LitesTemplarAttributeValue).attr);
-                                    break;
-                                
-                                case "param":
-                                    result += encodeURIComponent((value as LitesTemplarQueryParameterValue).param);
-                                    break;
-    
-                                case "verbatim":
-                                    result += (value as LitesTemplarVerbatimValue).verbatim;
-                                    break;
-                            }
+                case "object":
+                    {
+                        switch (Object.keys(value)[0]) {
+                            case "content":
+                                // Content escaping: &<
+                                result += (value as LiteralHtmlContentValue).content
+                                    .replaceAll("&", "&amp;")
+                                    .replaceAll("<", "&lt;")
+                                ;
+                                break;
+                            
+                            case "attr":
+                                // Quotation mark-delimited attribute escaping: &<"
+                                result += (value as LiteralHtmlAttributeValue).attr
+                                    .replaceAll("&", "&amp;")
+                                    .replaceAll("<", "&lt;")
+                                    .replaceAll("\"", "&quot;")
+                                ;
+                                break;
+                            
+                            case "param":
+                                // URI Component escaping
+                                result += encodeURIComponent((value as LiteralHtmlQueryParameterValue).param);
+                                break;
+
+                            case "verbatim":
+                                // Verbatim copy: no escaping
+                                result += (value as LiteralHtmlVerbatimValue).verbatim;
+                                break;
                         }
-                        break;
-                }
+                    }
+                    break;
             }
+
+            result += strings[i++];
         }
         return result;
     };

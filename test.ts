@@ -70,3 +70,33 @@ Deno.test({
         );
     },
 });
+
+Deno.test({
+    name: "Empty string",
+    fn: () => {
+        assertEquals(
+            html``,
+            ""
+        );
+    },
+});
+
+Deno.test({
+    name: "Empty first string",
+    fn: () => {
+        assertEquals(
+            html`${{verbatim: "<html>"}}</html>`,
+            "<html></html>"
+        );
+    },
+});
+
+Deno.test({
+    name: "Empty final string",
+    fn: () => {
+        assertEquals(
+            html`${{verbatim: "<html></html>"}}`,
+            "<html></html>"
+        );
+    },
+});
