@@ -1,18 +1,18 @@
-type LiteralHtmlContentValue = { content: string };
-type LiteralHtmlAttributeValue = { attr: string };
-type LiteralHtmlQueryParameterValue = { param: string };
-type LiteralHtmlVerbatimValue = { verbatim: string };
+type LiteralHTMLContentValue = { content: string };
+type LiteralHTMLAttributeValue = { attr: string };
+type LiteralHTMLQueryParameterValue = { param: string };
+type LiteralHTMLVerbatimValue = { verbatim: string };
 
-type LiteralHtmlValue =
+type LiteralHTMLValue =
     | string
     | number
-    | LiteralHtmlContentValue
-    | LiteralHtmlAttributeValue
-    | LiteralHtmlQueryParameterValue
-    | LiteralHtmlVerbatimValue
+    | LiteralHTMLContentValue
+    | LiteralHTMLAttributeValue
+    | LiteralHTMLQueryParameterValue
+    | LiteralHTMLVerbatimValue
 ;
 
-type taggedTemplateLiteralHandler = (strings: TemplateStringsArray, ...values: LiteralHtmlValue[]) => string;
+type taggedTemplateLiteralHandler = (strings: TemplateStringsArray, ...values: LiteralHTMLValue[]) => string;
 
 function createEscaper(aposEntity: string): taggedTemplateLiteralHandler {
     return (strings, ...values): string => {
@@ -41,7 +41,7 @@ function createEscaper(aposEntity: string): taggedTemplateLiteralHandler {
                         switch (Object.keys(value)[0]) {
                             case "content":
                                 // Content escaping: &<
-                                result += (value as LiteralHtmlContentValue).content
+                                result += (value as LiteralHTMLContentValue).content
                                     .replaceAll("&", "&amp;")
                                     .replaceAll("<", "&lt;")
                                 ;
@@ -49,7 +49,7 @@ function createEscaper(aposEntity: string): taggedTemplateLiteralHandler {
                             
                             case "attr":
                                 // Quotation mark-delimited attribute escaping: &<"
-                                result += (value as LiteralHtmlAttributeValue).attr
+                                result += (value as LiteralHTMLAttributeValue).attr
                                     .replaceAll("&", "&amp;")
                                     .replaceAll("<", "&lt;")
                                     .replaceAll("\"", "&quot;")
@@ -58,12 +58,12 @@ function createEscaper(aposEntity: string): taggedTemplateLiteralHandler {
                             
                             case "param":
                                 // URI Component escaping
-                                result += encodeURIComponent((value as LiteralHtmlQueryParameterValue).param);
+                                result += encodeURIComponent((value as LiteralHTMLQueryParameterValue).param);
                                 break;
 
                             case "verbatim":
                                 // Verbatim copy: no escaping
-                                result += (value as LiteralHtmlVerbatimValue).verbatim;
+                                result += (value as LiteralHTMLVerbatimValue).verbatim;
                                 break;
                         }
                     }
