@@ -1,7 +1,22 @@
-type LiteralHTMLContentValue = { content: string };
-type LiteralHTMLAttributeValue = { attr: string };
-type LiteralHTMLQueryParameterValue = { param: string };
-type LiteralHTMLVerbatimValue = { verbatim: string };
+type LiteralHTMLContentValue = {
+    /** General HTML/XML content that should have & and < escaped (e.g. html`<p>${{content: "This will be <escaped>"}}</p>`) */
+    content: string
+};
+
+type LiteralHTMLAttributeValue = {
+    /** Value for an HTML/XML attribute enclosed in quotation marks that should have &, <, and " escaped (e.g. html`<button value="${{attr: 'This will be "escaped"'}}"></button>`) */
+    attr: string
+};
+
+type LiteralHTMLQueryParameterValue = {
+    /** Value for a URI Component (e.g. query parameter) that should be escaped using encodeURIComponent() */
+    param: string
+};
+
+type LiteralHTMLVerbatimValue = {
+    /** Verbatim HTML/XML content that should be copied verbatim; only use with strings that have already been properly escaped (e.g. html`<ul>${{verbatim: ["<", ">"].map(x => html`<li>${x}</li>`).join("")}}</ul>`)  */
+    verbatim: string
+};
 
 type LiteralHTMLValue =
     | string
@@ -76,5 +91,8 @@ function createEscaper(aposEntity: string): taggedTemplateLiteralHandler {
     };
 }
 
+/** Tagged literal template handler for HTML templates; accepts strings, numbers, and objects with a single key named content, attr, param, or verbatim */
 export const html: taggedTemplateLiteralHandler = createEscaper("&#39;");
+
+/** Tagged literal template handler for XML templates; accepts strings, numbers, and objects with a single key named content, attr, param, or verbatim */
 export const xml: taggedTemplateLiteralHandler = createEscaper("&apos;");
