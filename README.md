@@ -8,15 +8,15 @@ Tagged template literals in JavaScript start with a tag (`html` or `xml` for thi
 
 Values are inserted as JavaScript expressions enclosed in braces, prefixed by a dollar sign (e.g. `` html`<p>${value}</p>` ``).
 
-For literal-html, if the expression evaluates to an object with a single key, the key indicates the type of escaping that is required. For example, `{attr: "&"}` is an object with `attr` as its key and `"&"` as its (string) value. This tells literal-html to escape the value as a quotation mark-enclosed value. For example, `` html`<img alt="${{attr: "&"}}" />` `` would be escaped as `<img alt="&amp;" />`.
+For literal-html, if the expression evaluates to an object with a single key, the key indicates the type of escaping that is required. For example, `{attr: "&"}` is an object with `attr` as its key and `"&"` as its (string) value. This tells literal-html to escape the value as an attribute value. For example, `` html`<img alt="${{attr: "&"}}" />` `` would be escaped as `<img alt="&amp;" />`.
 
 Supported types and keys:
 
 | Format | Escapes | Notes |
 |---|---|---|
 | `${...}` | &<>'" | Supports `number` in addition to `string` |
-| `${{content: ...}}` | &< | |
-| `${{attr: ...}}` | &<" | Only supports quotation mark-enclosed values |
+| `${{content: ...}}` | &<> | |
+| `${{attr: ...}}` | &<>'" | |
 | `${{param: ...}}` | `encodeURIComponent()` | For URL query parameters |
 | `${{verbatim: ...}}` | (none) | Only use with previously escaped strings |
 
@@ -31,7 +31,7 @@ const value = ...; // Some string to be inserted
 const fragmentHTML = html`<p>${value}</p>`;
 const fragmentXML = xml`<text>${value}</text>`;
 
-// You can specify the type of escaping required using an object with a single key, e.g. {attr: ...} for a quotation mark-enclosed attribute`:
+// You can specify the type of escaping required using an object with a single key, e.g. {attr: ...} for an attribute`:
 const fragment3 = html`<img alt="${{attr: value}}" />`;
 
 // To eliminate escaping altogether use the "verbatim" key:
@@ -53,25 +53,23 @@ const result = html`<html><body><p>${value}</p></body></html>`;
 const value = "what's <this> do? this & \"that\"!";
 const result = html`<html><body><p>${{content: value}}</p></body></html>`;
 
-// Result: <html><body><p>what's &lt;this> do? this &amp; "that"!</p></body></html>
+// Result: <html><body><p>what's &lt;this&gt; do? this &amp; "that"!</p></body></html>
 ```
 
 ### Attribute value (escapes: &<")
-This should only be used for quotation mark-enclosed (XML style) attribute values.
-
 ```javascript
 const value = "what's <this> do? this & \"that\"!";
 const result = html`<html><body><img alt="${{attr: value}}" /></body></html>`;
 
-// Result: <html><body><img alt="what's &lt;this> do? this &amp; &quot;that&quot;!" /></body></html>
+// Result: <html><body><img alt="what&#39;s &lt;this&gt; do? this &amp; &quot;that&quot;!" /></body></html>
 ```
 
-### Query parameters/URI components (escapes using `encodeURIComponent()`)
+### Query parameters/URI components (escapes using `encodeURIComponent()` and escaping &<>'")
 ```javascript
 const value = "what's <this> do? 'this' & \"that\"!";
 const result = html`<html><body><p><a href="https://www.bing.com/search?q=${{param: value}}">Link</a></p></body></html>`;
 
-// Result: <html><body><p><a href="https://www.bing.com/search?q=what's%20%3Cthis%3E%20do%3F%20'this'%20%26%20%22that%22!">Link</a></p></body></html>
+// Result: <html><body><p><a href="https://www.bing.com/search?q=what&#39;s%20%3Cthis%3E%20do%3F%20&#39;this&#39;%20%26%20%22that%22!">Link</a></p></body></html>
 ```
 
 ### Verbatim strings (no escaping)

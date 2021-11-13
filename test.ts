@@ -5,7 +5,7 @@ import { html, xml } from "./mod.ts";
 Deno.test({
     name: "Content example",
     fn: () => {
-        assertEquals(html`<p>${{content: "This will be <escaped>"}}</p>`, "<p>This will be &lt;escaped></p>");
+        assertEquals(html`<p>${{content: "This will be <escaped>"}}</p>`, "<p>This will be &lt;escaped&gt;</p>");
     },
 });
 
@@ -74,7 +74,7 @@ Deno.test({
     fn: () => {
         const value = "what's <this> do? this & \"that\"!";
         const result = html`<html><body><p>${{content: value}}</p></body></html>`;
-        assertEquals(result, `<html><body><p>what's &lt;this> do? this &amp; "that"!</p></body></html>`);
+        assertEquals(result, `<html><body><p>what's &lt;this&gt; do? this &amp; "that"!</p></body></html>`);
     },
 });
 
@@ -83,7 +83,7 @@ Deno.test({
     fn: () => {
         const value = "what's <this> do? this & \"that\"!";
         const result = html`<html><body><img alt="${{attr: value}}" /></body></html>`;
-        assertEquals(result, `<html><body><img alt="what's &lt;this> do? this &amp; &quot;that&quot;!" /></body></html>`);
+        assertEquals(result, `<html><body><img alt="what&#39;s &lt;this&gt; do? this &amp; &quot;that&quot;!" /></body></html>`);
     },
 });
 
@@ -92,7 +92,7 @@ Deno.test({
     fn: () => {
         const value = "what's <this> do? 'this' & \"that\"!";
         const result = html`<html><body><p><a href="https://www.bing.com/search?q=${{param: value}}">Link</a></p></body></html>`;
-        assertEquals(result, `<html><body><p><a href="https://www.bing.com/search?q=what's%20%3Cthis%3E%20do%3F%20'this'%20%26%20%22that%22!">Link</a></p></body></html>`);
+        assertEquals(result, `<html><body><p><a href="https://www.bing.com/search?q=what&#39;s%20%3Cthis%3E%20do%3F%20&#39;this&#39;%20%26%20%22that%22!">Link</a></p></body></html>`);
     },
 });
 

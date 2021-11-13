@@ -1,10 +1,10 @@
 type LiteralHTMLContentValue = {
-    /** General HTML/XML content that should have & and < escaped (e.g. html`<p>${{content: "This will be <escaped>"}}</p>`) */
+    /** General HTML/XML content that should have &, <, and > escaped (e.g. html`<p>${{content: "This will be <escaped>"}}</p>`) */
     content: string
 };
 
 type LiteralHTMLAttributeValue = {
-    /** Value for an HTML/XML attribute enclosed in quotation marks that should have &, <, and " escaped (e.g. html`<img alt="${{attr: 'This will be "escaped"'}}" />`) */
+    /** HTML/XML attribute value that should have &, <, >, ', and " escaped (e.g. html`<img alt="${{attr: 'This will be "escaped"'}}" />`) */
     attr: string
 };
 
@@ -30,6 +30,14 @@ type LiteralHTMLValue =
 type taggedTemplateLiteralHandler = (strings: TemplateStringsArray, ...values: LiteralHTMLValue[]) => string;
 
 function createEscaper(aposEntity: string): taggedTemplateLiteralHandler {
+    const escapeDefault = (str: string) => str
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll("'", aposEntity)
+        .replaceAll("\"", "&quot;")
+    ;
+
     return (strings, ...values): string => {
         let result = strings[0];
         let i = 1;
@@ -37,13 +45,7 @@ function createEscaper(aposEntity: string): taggedTemplateLiteralHandler {
             switch (typeof(value)) {
                 case "string":
                     // Default escaping: &<>'"
-                    result += value
-                        .replaceAll("&", "&amp;")
-                        .replaceAll("<", "&lt;")
-                        .replaceAll(">", "&gt;")
-                        .replaceAll("'", aposEntity)
-                        .replaceAll("\"", "&quot;")
-                    ;
+                    result += escapeDefault(value);
                     break;
 
                 case "number":
@@ -55,25 +57,22 @@ function createEscaper(aposEntity: string): taggedTemplateLiteralHandler {
                     {
                         switch (Object.keys(value)[0]) {
                             case "content":
-                                // Content escaping: &<
+                                // Content escaping: &<>
                                 result += (value as LiteralHTMLContentValue).content
                                     .replaceAll("&", "&amp;")
                                     .replaceAll("<", "&lt;")
+                                    .replaceAll(">", "&gt;")
                                 ;
                                 break;
                             
                             case "attr":
-                                // Quotation mark-delimited attribute escaping: &<"
-                                result += (value as LiteralHTMLAttributeValue).attr
-                                    .replaceAll("&", "&amp;")
-                                    .replaceAll("<", "&lt;")
-                                    .replaceAll("\"", "&quot;")
-                                ;
+                                // Attribute value escaping: &<>'"
+                                result += escapeDefault((value as LiteralHTMLAttributeValue).attr);
                                 break;
                             
                             case "param":
-                                // URI Component escaping
-                                result += encodeURIComponent((value as LiteralHTMLQueryParameterValue).param);
+                                // URI Component (and attribute) escaping
+                                result += escapeDefault(encodeURIComponent((value as LiteralHTMLQueryParameterValue).param));
                                 break;
 
                             case "verbatim":
