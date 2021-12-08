@@ -145,3 +145,13 @@ Deno.test({
         );
     },
 });
+
+Deno.test({
+    name: "JSON-LD",
+    fn: () => {
+        assertEquals(
+            html`<script type="application/ld+json">{ "name": "${{scriptString: 'A < "B" \\ C'}}" }</script>`,
+            `<script type="application/ld+json">{ "name": "A \\x3C \\"B\\" \\\\ C" }</script>`
+        );
+    },
+});

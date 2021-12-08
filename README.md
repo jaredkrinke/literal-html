@@ -17,6 +17,7 @@ Supported types and keys:
 | `${...}` | &<>'" | Supports `number` in addition to `string` |
 | `${{content: ...}}` | &<> | |
 | `${{attr: ...}}` | &<>'" | |
+| `${{scriptString: ...}}` | <"\ | Namely for use in JSON-LD |
 | `${{param: ...}}` | `encodeURIComponent()` | For URL query parameters |
 | `${{verbatim: ...}}` | (none) | Only use with previously escaped strings |
 
@@ -62,6 +63,14 @@ const value = "what's <this> do? this & \"that\"!";
 const result = html`<html><body><img alt="${{attr: value}}" /></body></html>`;
 
 // Result: <html><body><img alt="what&#39;s &lt;this&gt; do? this &amp; &quot;that&quot;!" /></body></html>
+```
+
+### HTML/JSON script string (escapes: <"\\)
+```javascript
+const value = 'A < "B" \\ C';
+const result = html`<script type="application/ld+json">{ "name": "${{scriptString: value}}" }</script>`;
+
+// Result: <script type="application/ld+json">{ "name": "A \x3C \"B\" \\ C" }</script>
 ```
 
 ### Query parameters/URI components (escapes using `encodeURIComponent()` and escaping &<>'")

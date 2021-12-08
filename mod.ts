@@ -8,6 +8,11 @@ type LiteralHTMLAttributeValue = {
     attr: string
 };
 
+type LiteralHTMLScriptStringLiteralValue = {
+    /** A string literal within an HTML script tag (namely for JSON-LD) that should have <, ", and \ escaped */
+    scriptString: string
+};
+
 type LiteralHTMLQueryParameterValue = {
     /** Value for a URI Component (e.g. query parameter) that should be escaped using encodeURIComponent() */
     param: string
@@ -23,6 +28,7 @@ type LiteralHTMLValue =
     | number
     | LiteralHTMLContentValue
     | LiteralHTMLAttributeValue
+    | LiteralHTMLScriptStringLiteralValue
     | LiteralHTMLQueryParameterValue
     | LiteralHTMLVerbatimValue
 ;
@@ -68,6 +74,15 @@ function createEscaper(aposEntity: string): taggedTemplateLiteralHandler {
                             case "attr":
                                 // Attribute value escaping: &<>'"
                                 result += escapeDefault((value as LiteralHTMLAttributeValue).attr);
+                                break;
+
+                            case "scriptString" :
+                                // HTML script string literal escaping: <"\
+                                result += (value as LiteralHTMLScriptStringLiteralValue).scriptString
+                                    .replaceAll("\\", "\\\\")
+                                    .replaceAll("<", "\\x3C")
+                                    .replaceAll("\"", "\\\"")
+                                ;
                                 break;
                             
                             case "param":
